@@ -4,3 +4,6 @@ __pycache__
 *.py[co]
 db.sqlite3
 env
+model.pickle
+train_x.csv
+train_y.csv
