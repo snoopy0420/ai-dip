@@ -25,7 +25,7 @@ SECRET_KEY = 'x(ns736(e&_(bsp&m_l5libzn5hd&vhw8^tx)ypo(#giboob4='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
