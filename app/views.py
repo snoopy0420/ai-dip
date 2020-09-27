@@ -111,7 +111,7 @@ class UploadView(FormView):
         # NaN_期間･時間　備考を追加したので削除
         all_df = all_df.drop(columns=["期間･時間　備考"])
 
-        token_df = pd.read_csv("trian_token.csv")
+        token_df = pd.read_csv("train_token.csv")
 
         # お仕事名
         char_filters = [UnicodeNormalizeCharFilter(),
