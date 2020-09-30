@@ -13,18 +13,6 @@ from janome.tokenizer import Tokenizer
 from janome.analyzer import Analyzer
 from janome.charfilter import *
 from janome.tokenfilter import *
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.linear_model import Lasso
-import xgboost as xgb
-import lightgbm as lgb
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import RobustScaler
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
@@ -111,62 +99,62 @@ class UploadView(FormView):
         # NaN_期間･時間　備考を追加したので削除
         all_df = all_df.drop(columns=["期間･時間　備考"])
 
-        token_df = pd.read_csv("token.csv")
+        token_df = pd.read_csv("train_token.csv")
 
-        # お仕事名
-        # char_filters = [UnicodeNormalizeCharFilter(),
-        #                 RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
-        #             ]
-        # token_filters = [CompoundNounFilter(),
-        #                 POSKeepFilter(['名詞']),
-        #                 LowerCaseFilter()
-        #                 ]
-        # a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
-        # length = all_df["応募数mean"].notnull().sum()
-        # all_df['お仕事名_token'] = all_df['お仕事名']
-        # all_df['お仕事名_token'][:length] = token_df["お仕事名_token"]
-        # all_df['お仕事名_token'][length:] = all_df["お仕事名"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
-        all_df['お仕事名_token'] = token_df["お仕事名_token"]
+        #お仕事名
+        char_filters = [UnicodeNormalizeCharFilter(),
+                        RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
+                    ]
+        token_filters = [CompoundNounFilter(),
+                        POSKeepFilter(['名詞']),
+                        LowerCaseFilter()
+                        ]
+        a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
+        length = all_df["応募数mean"].notnull().sum()
+        all_df['お仕事名_token'] = all_df['お仕事名']
+        all_df['お仕事名_token'][:length] = token_df["お仕事名_token"]
+        all_df['お仕事名_token'][length:] = all_df["お仕事名"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
+        #all_df['お仕事名_token'] = token_df["お仕事名_token"]
 
         with open("grid_1.pickle", mode="rb") as ff:
             model = pickle.load(ff)
         all_df["お仕事名_pred"] = model.predict(all_df['お仕事名_token'])
         all_df = all_df.drop(columns=['お仕事名_token'])
 
-        # 仕事内容
-        # char_filters = [UnicodeNormalizeCharFilter(),
-        #                 RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
-        #             ]
-        # token_filters = [CompoundNounFilter(),
-        #                 POSKeepFilter(['名詞']),
-        #                 LowerCaseFilter()
-        #                 ]
-        # a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
-        # length = all_df["応募数mean"].notnull().sum()
-        # all_df['仕事内容_token']  = np.nan
-        # all_df['仕事内容_token'][:length] = token_df["仕事内容_token"]
-        # all_df['仕事内容_token'][length:] = all_df["仕事内容"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
-        all_df['仕事内容_token'] = token_df["仕事内容_token"]
+        #仕事内容
+        char_filters = [UnicodeNormalizeCharFilter(),
+                        RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
+                    ]
+        token_filters = [CompoundNounFilter(),
+                        POSKeepFilter(['名詞']),
+                        LowerCaseFilter()
+                        ]
+        a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
+        length = all_df["応募数mean"].notnull().sum()
+        all_df['仕事内容_token']  = np.nan
+        all_df['仕事内容_token'][:length] = token_df["仕事内容_token"]
+        all_df['仕事内容_token'][length:] = all_df["仕事内容"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
+        #all_df['仕事内容_token'] = token_df["仕事内容_token"]
 
         with open("grid_2.pickle", mode="rb") as ff:
             model = pickle.load(ff)
         all_df["仕事内容_pred"] = model.predict(all_df['仕事内容_token'])
         all_df = all_df.drop(columns=['仕事内容_token'])
 
-        # お仕事のポイント（仕事PR）
-        # char_filters = [UnicodeNormalizeCharFilter(),
-        #                 RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
-        #             ]
-        # token_filters = [CompoundNounFilter(),
-        #                 POSKeepFilter(['名詞']),
-        #                 LowerCaseFilter()
-        #                 ]
-        # a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
-        # length = all_df["応募数mean"].notnull().sum()
-        # all_df['お仕事のポイント_token'] = np.nan
-        # all_df['お仕事のポイント_token'][:length] = token_df["お仕事のポイント_token"]
-        # all_df['お仕事のポイント_token'][length:] = all_df["お仕事のポイント（仕事PR）"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
-        all_df['お仕事のポイント_token'] = token_df["お仕事のポイント_token"]
+        #お仕事のポイント（仕事PR）
+        char_filters = [UnicodeNormalizeCharFilter(),
+                        RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
+                    ]
+        token_filters = [CompoundNounFilter(),
+                        POSKeepFilter(['名詞']),
+                        LowerCaseFilter()
+                        ]
+        a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
+        length = all_df["応募数mean"].notnull().sum()
+        all_df['お仕事のポイント_token'] = np.nan
+        all_df['お仕事のポイント_token'][:length] = token_df["お仕事のポイント_token"]
+        all_df['お仕事のポイント_token'][length:] = all_df["お仕事のポイント（仕事PR）"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
+        #all_df['お仕事のポイント_token'] = token_df["お仕事のポイント_token"]
 
         with open("grid_3.pickle", mode="rb") as ff:
             model = pickle.load(ff)
@@ -174,18 +162,18 @@ class UploadView(FormView):
         all_df = all_df.drop(columns=['お仕事のポイント_token'])
 
         # （派遣先）配属先部署
-        # char_filters = [UnicodeNormalizeCharFilter(),
-        #                 RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
-        #             ]
-        # token_filters = [POSKeepFilter(['名詞']),
-        #                 LowerCaseFilter()
-        #                 ]
-        # a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
-        # length = all_df["応募数mean"].notnull().sum()
-        # all_df['（派遣先）配属先部署_token'] = np.nan
-        # all_df['（派遣先）配属先部署_token'][:length] = token_df["（派遣先）配属先部署_token"]
-        # all_df['（派遣先）配属先部署_token'][length:] = all_df["（派遣先）配属先部署"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
-        all_df['（派遣先）配属先部署_token'] = token_df["（派遣先）配属先部署_token"]
+        char_filters = [UnicodeNormalizeCharFilter(),
+                        RegexReplaceCharFilter(r"[!$%&\'()*+,-./:;<=>?@\\^_`{|}~◆▼★②●☆■★【】『』「」、♪≪≫]", " ")
+                    ]
+        token_filters = [POSKeepFilter(['名詞']),
+                        LowerCaseFilter()
+                        ]
+        a = Analyzer(char_filters=char_filters,  token_filters=token_filters)
+        length = all_df["応募数mean"].notnull().sum()
+        all_df['（派遣先）配属先部署_token'] = np.nan
+        all_df['（派遣先）配属先部署_token'][:length] = token_df["（派遣先）配属先部署_token"]
+        all_df['（派遣先）配属先部署_token'][length:] = all_df["（派遣先）配属先部署"][length:].apply(lambda x: " ".join([token.surface for token in a.analyze(x)]))
+        #all_df['（派遣先）配属先部署_token'] = token_df["（派遣先）配属先部署_token"]
 
         with open("grid_4.pickle", mode="rb") as ff:
             model = pickle.load(ff)
