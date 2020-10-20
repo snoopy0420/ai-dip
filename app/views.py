@@ -21,7 +21,7 @@ class UploadView(FormView):
         test_x = pd.read_csv(form.cleaned_data['file'], na_values=["なし"])
         #予測をファイルに保存
         submit_values = pred(test_x)
-        submit_values.to_csv("/app/submit.csv", index=False, encoding="utf-8")
+        submit_values.to_csv("submit.csv", index=False, encoding="utf-8")
 
         return redirect("move")
 
@@ -36,7 +36,7 @@ def export(request):
     response['Content-Disposition'] = 'attachment; filename = "result.csv"'
 
     # 保存したファイルから結果をダウンロード
-    submit = pd.read_csv("/app/submit.csv", encoding="utf-8")
+    submit = pd.read_csv("submit.csv", encoding="utf-8")
     submit_values = submit.values.tolist()
     submit_columns = submit.columns.tolist()
     submit_values.insert(0, submit_columns)
