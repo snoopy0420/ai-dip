@@ -9,16 +9,13 @@
 </head>
 <body>
 <div>
-    <h1>応募数予測アプリ</h1>
-    <form action="{% url 'index' %}" method="POST" enctype="multipart/form-data">
+    <h1>予測結果ダウンロード</h1>
+    <form action="{% url 'export' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div>
-            <div>
-                {{ form.file }}
-                <p>{{ form.file.errors }}</p>
-            </div>
+            <input type="submit" value="ダウンロード">
         </div>
-        <input type="submit" value="アップロード">
+        
     </form>
 </div>
 </div>
