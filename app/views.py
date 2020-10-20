@@ -21,7 +21,7 @@ class UploadView(FormView):
         test_x = pd.read_csv(form.cleaned_data['file'], na_values=["なし"])
         #予測をファイルに保存
         submit_values = pred(test_x)
-        #submit_values.to_csv("submit.csv", index=False, encoding="utf-8")
+        submit_values.to_csv("submit.csv", index=False, encoding="utf-8")
 
         return redirect("move")
 
