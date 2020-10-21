@@ -206,5 +206,6 @@ def pred(test_x):
         # submission = pd.DataFrame({"お仕事No.": test_x["お仕事No."].values, "応募数 合計": pred})
 
     submission = pd.read_csv("submission.csv")
+    
 
     return submission

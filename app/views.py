@@ -11,6 +11,8 @@ from django.shortcuts import render
 from .module import pred
 from django.shortcuts import redirect
 
+from .models import Post
+
 
 class UploadView(FormView):
     form_class = UploadForm
@@ -42,7 +44,10 @@ def export(request):
     submit_values.insert(0, submit_columns)
 
     writer = csv.writer(response)  
-    for row in submit_values:
-        writer.writerow(row)
+    # for row in submit_values:
+    #     writer.writerow(row)
+
+    for post in Post.objects.all():
+        writer.writerow([post.number, post.value])
 
     return response

@@ -8,6 +8,6 @@ from .views import export
 urlpatterns = [
     path('', UploadView.as_view(), name='index'),
     path('form_valid', UploadView.form_valid, name ='form_valid'),
-    path('/move', move, name='move'),
+    path('move', move, name='move'),
     path('export', export, name ='export'),
     ]
