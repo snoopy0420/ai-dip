@@ -38,10 +38,10 @@ def export(request):
     response['Content-Disposition'] = 'attachment; filename = "result.csv"'
 
     # 保存したファイルから結果をダウンロード
-    submit = pd.read_csv("submit.csv", encoding="utf-8")
-    submit_values = submit.values.tolist()
-    submit_columns = submit.columns.tolist()
-    submit_values.insert(0, submit_columns)
+    # submit = pd.read_csv("submit.csv", encoding="utf-8")
+    # submit_values = submit.values.tolist()
+    # submit_columns = submit.columns.tolist()
+    # submit_values.insert(0, submit_columns)
 
     writer = csv.writer(response)  
     # for row in submit_values:
