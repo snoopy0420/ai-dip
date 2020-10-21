@@ -19,15 +19,14 @@ def pred(test_x):
     train_y = train_y.drop(columns=["お仕事No."])
     all_df = pd.concat([all_x, train_y], axis=1)
 
-    #
-
+    #ここにモデル
     submission = pd.read_csv("submission.csv")
 
+    # 予測値をリストで返す
     submit_values = submission.values.tolist()
     submit_columns = submission.columns.tolist()
     submit_values.insert(0, submit_columns)
     
-
     return submit_values
 
 
