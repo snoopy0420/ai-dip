@@ -19,6 +19,18 @@ def pred(test_x):
     train_y = train_y.drop(columns=["お仕事No."])
     all_df = pd.concat([all_x, train_y], axis=1)
 
+    #
+
+    submission = pd.read_csv("submission.csv")
+
+    submit_values = submission.values.tolist()
+    submit_columns = submission.columns.tolist()
+    submit_values.insert(0, submit_columns)
+    
+
+    return submit_values
+
+
         # # 全て欠損しているカラム
         # allnot_col = list(all_df.isnull().sum()[all_df.isnull().sum()==19244].index)
         # all_df = all_df.drop(columns=allnot_col)
