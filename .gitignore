@@ -4,3 +4,4 @@ __pycache__
 *.py[co]
 env
 vscode.ipynb
+dip.ipynb
