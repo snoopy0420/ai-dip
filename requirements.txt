@@ -7,3 +7,4 @@ scikit-learn==0.23.2
 xgboost==1.2.0
 lightgbm==3.0.0
 janome==0.4.1
+# MeCab

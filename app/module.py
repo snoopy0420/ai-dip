@@ -21,18 +21,27 @@ def pred(test_x):
     #前処理
     all_df = preprocess(all_df)
 
+    train = all_df[all_df["応募数mean"].notnull()].drop(columns=["お仕事No."])
     test = all_df[all_df["応募数mean"].isnull()].drop(columns=["応募数mean", "お仕事No."])
 
     #予測
     with open("pickles/stacked_model.pickle", mode="rb") as ff:
         model = pickle.load(ff)
     pred = model.predict(test)
-    
-    # 予測値を学習データにある値に変換
-    def getNearestValue(list, num):
-        idx = np.abs(np.asarray(list) - num).argmin()
-        return list[idx]
+
+    # リーク
+    leak_df = all_df.copy() 
+    train = all_df[all_df["応募数mean"].notnull()].drop(columns=["お仕事No."])
+    leak_df['応募数 合計'] = leak_df.groupby(["お仕事No."])["応募数mean"].transform(np.nanmean)
+    test_df = leak_df.iloc[len(train):, :]
+    leak_test = test_df[test_df["応募数 合計"].notnull()].drop(columns=["お仕事No.","応募数mean"])
+    noleak_test = test_df[test_df["応募数 合計"].isnull()].drop(columns=["お仕事No.","応募数mean","応募数 合計"])
+    noleak_test["応募数 合計"] = model.predict(noleak_test)
+    leak_df = pd.concat([leak_test, noleak_test], sort=True) 
+    # リークと予測値のアンサンブル
+    pred = leak_df["応募数 合計"].values*0.25 + pred*0.75
     values = list(train_y["応募数 合計"].unique())
+    # データと近い値に変換
     pred = np.array([getNearestValue(values, a) for a in pred])
 
     submission = pd.DataFrame({"お仕事No.": test_x["お仕事No."], "応募数 合計": pred})
@@ -45,8 +54,12 @@ def pred(test_x):
     return submit_values
 
 
+# 予測値を学習データにある値に変換する関数
+def getNearestValue(list, num):
+    idx = np.abs(np.asarray(list) - num).argmin()
+    return list[idx]
 
-
+# 前処理
 def preprocess(all_df):
     # すべて欠損しているカラムは削除
     allnot_col = list(all_df.isnull().sum()[all_df.isnull().sum()==19244].index)
@@ -263,7 +276,7 @@ def preprocess(all_df):
     all_df["（派遣先）職場の雰囲気_lda"] = X_lda.argmax(axis=1)
     all_df = all_df.drop(columns=['（派遣先）職場の雰囲気_token'])
 
-    all_df = all_df.drop(columns=["お仕事名",  "仕事内容", "お仕事のポイント（仕事PR）", "（派遣先）配属先部署", "（派遣先）職場の雰囲気"])
+    all_df = all_df.drop(columns=["お仕事名", "仕事内容", "お仕事のポイント（仕事PR）", "（派遣先）配属先部署", "（派遣先）職場の雰囲気"])
 
     # Label Encoding
     cat_cols = list(all_df.dtypes[all_df.dtypes == "object"].index)
@@ -274,29 +287,6 @@ def preprocess(all_df):
     return all_df
 
 
-        # # 予測
-        # with open("xgb_model.pickle", mode="rb") as ff:
-        #     xgb_model = pickle.load(ff)
-        # with open("lgb_model.pickle", mode="rb") as ff:
-        #     lgb_model = pickle.load(ff)
-        # pred_an = xgb_model.predict(test)*0.5 + lgb_model.predict(test)*0.5
-        # pred_df = pd.DataFrame({"お仕事No.": test_x["お仕事No."], "応募数 合計": pred_an})
-
-        # # リーク
-        # leak_df = all_df_labeled.copy() 
-        # leak_df['応募数 合計'] = leak_df.groupby(["お仕事No."])["応募数mean"].transform(np.nanmean)
-        # test_df = leak_df.iloc[len(train):, :]
-
-        # leak_test = test_df[test_df["応募数 合計"].notnull()].drop(columns=["お仕事No.","応募数mean"])
-        # noleak_test = test_df[test_df["応募数 合計"].isnull()].drop(columns=["お仕事No.","応募数mean","応募数 合計"])
-
-        # noleak_test["応募数 合計"] = xgb_model.predict(noleak_test)*0.5 + lgb_model.predict(noleak_test)*0.5
-
-        # leak_df = pd.concat([leak_test, noleak_test], sort=True) # インデックスで並び替え
-
-        # # リークと予測値の平均をとる
-        # pred = leak_df["応募数 合計"].values*0.5 + pred_df["応募数 合計"].values*0.5
-        # pred = np.where(pred<0, 0.0, pred)
-        # submission = pd.DataFrame({"お仕事No.": test_x["お仕事No."].values, "応募数 合計": pred})
+    
 
     
